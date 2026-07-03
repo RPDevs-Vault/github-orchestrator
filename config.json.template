@@ -1,0 +1,27 @@
+{
+  "github_org": "RPDevs-Vault",
+  "github_token": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN",
+  "polling_interval_seconds": 60,
+  "hosts": [
+    {
+      "name": "llmadmin01",
+      "ip": "10.0.0.100",
+      "mac": "AA:BB:CC:DD:EE:FF",
+      "ssh_user": "llmadmin",
+      "ssh_key_path": "/etc/runner_orchestrator/id_rsa",
+      "container_name": "action-runner-prod",
+      "suspend_idle": true,
+      "idle_timeout_seconds": 1800
+    },
+    {
+      "name": "t430",
+      "ip": "10.0.0.101",
+      "mac": "11:22:33:44:55:66",
+      "ssh_user": "llmadmin",
+      "ssh_key_path": "/etc/runner_orchestrator/id_rsa",
+      "container_name": "action-runner-prod",
+      "suspend_idle": true,
+      "idle_timeout_seconds": 1800
+    }
+  ]
+}
