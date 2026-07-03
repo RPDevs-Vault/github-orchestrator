@@ -1,15 +1,18 @@
 # 🔌 OpenWrt Router-Based Runner Orchestrator
 
-This subdirectory contains the configuration, installation documentation, and orchestration script to automatically manage the power state and docker execution of GitHub self-hosted runners on physical hosts `llmadmin01` (10.0.0.100) and `t430` (10.0.0.101).
+This repository contains the configuration, installation documentation, and orchestration script to automatically manage the lifecycle (power state and docker execution) of GitHub self-hosted runners on physical target machines.
+
+It features a decoupled architecture supporting multiple monitors (e.g. GitHub Organizations) mapped to specific runner containers on multiple physical/virtual machines.
 
 ---
 
 ## 🚀 How it Works
 
-1. **Check Queue**: The orchestrator script polls the GitHub API every minute checking for `queued` workflows inside the organization.
-2. **Wake Hosts (WoL)**: If there are queued jobs and the target docker hosts are offline (unreachable via ping), the router broadcasts a **Wake-on-LAN (WoL)** packet to boot the physical machines.
-3. **Start Runners**: Once the hosts are online, the router SSHes into the target hosts and boots the Docker runner container (`action-runner-prod`).
-4. **Idle Suspend**: When the queue is clear and no runners are actively processing jobs, the router stops the containers and issues a secure `systemctl suspend` command to the physical hosts to save power.
+1. **Check Monitors**: The orchestrator daemon polls all configured monitor sources (e.g., GitHub Organizations) via API to check for queued or in-progress workflow runs.
+2. **Wake Target Machines (WoL)**: If any monitor has active jobs, the script identifies which machines host the corresponding runner containers. If those machines are offline, it broadcasts **Wake-on-LAN (WoL)** packets to boot them.
+3. **Start Active Runners**: Once the machines are online, the daemon SSHes into them and starts only the runner containers associated with the active monitor queues.
+4. **Stop Idle Runners & Suspend**: When a monitor has no active/queued runs, the daemon stops the corresponding runner containers on the hosts. If all runner containers on a machine are stopped/idle, and `suspend_idle` is enabled (with no active SSH users), it suspends the machine to save power.
+
 
 ---
 

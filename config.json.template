@@ -1,27 +1,41 @@
 {
-  "github_org": "RPDevs-Vault",
-  "github_token": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN",
   "polling_interval_seconds": 60,
-  "hosts": [
+  "monitors": [
+    {
+      "id": "rpdevs-vault-org",
+      "type": "github_org",
+      "github_org": "RPDevs-Vault",
+      "github_token": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
+    }
+  ],
+  "machines": [
     {
       "name": "llmadmin01",
-      "ip": "10.0.0.100",
-      "mac": "AA:BB:CC:DD:EE:FF",
-      "ssh_user": "llmadmin",
-      "ssh_key_path": "/etc/runner_orchestrator/id_rsa",
-      "container_name": "action-runner-prod",
-      "suspend_idle": true,
-      "idle_timeout_seconds": 1800
+      "ip": "10.10.0.10",
+      "mac": "64:5d:86:7c:c6:62",
+      "ssh_user": "llmuser",
+      "ssh_key_path": "/etc/runner_orchestrator/id_dropbear",
+      "suspend_idle": false,
+      "runners": [
+        {
+          "container_name": "local-runner-builder",
+          "monitor_id": "rpdevs-vault-org"
+        }
+      ]
     },
     {
       "name": "t430",
-      "ip": "10.0.0.101",
-      "mac": "11:22:33:44:55:66",
-      "ssh_user": "llmadmin",
-      "ssh_key_path": "/etc/runner_orchestrator/id_rsa",
-      "container_name": "action-runner-prod",
-      "suspend_idle": true,
-      "idle_timeout_seconds": 1800
+      "ip": "10.13.0.10",
+      "mac": "28:d2:44:22:67:c9",
+      "ssh_user": "user",
+      "ssh_key_path": "/etc/runner_orchestrator/id_dropbear",
+      "suspend_idle": false,
+      "runners": [
+        {
+          "container_name": "t430-runner",
+          "monitor_id": "rpdevs-vault-org"
+        }
+      ]
     }
   ]
 }
