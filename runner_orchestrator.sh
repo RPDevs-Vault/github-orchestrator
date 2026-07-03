@@ -60,6 +60,45 @@ get_monitor_jobs() {
       local in_progress="${MOCK_IN_PROGRESS_COUNT:-0}"
       echo $((queued + in_progress))
     else
+      # Check if gh CLI is available
+      if command -v gh >/dev/null 2>&1; then
+        local repos
+        repos=$(jq -r ".monitors[$monitor_idx].repos[]" "$CONFIG_PATH" 2>/dev/null)
+        
+        # Fallback to dynamic discovery of top 15 pushed repos if list is empty
+        if [ -z "$repos" ] || [ "$repos" = "null" ]; then
+          repos=$(GH_TOKEN="$token" gh api "orgs/${org}/repos?sort=pushed&direction=desc&per_page=15" --jq '.[].name' 2>/dev/null)
+        fi
+        
+        if [ -n "$repos" ]; then
+          local total_active=0
+          local temp_dir
+          temp_dir=$(mktemp -d)
+          
+          for repo in $repos; do
+            (
+              local q_cnt ip_cnt
+              q_cnt=$(GH_TOKEN="$token" gh api "repos/${org}/${repo}/actions/runs?status=queued" --jq '.total_count' 2>/dev/null || echo 0)
+              ip_cnt=$(GH_TOKEN="$token" gh api "repos/${org}/${repo}/actions/runs?status=in_progress" --jq '.total_count' 2>/dev/null || echo 0)
+              echo $((q_cnt + ip_cnt)) > "$temp_dir/$repo"
+            ) &
+          done
+          wait
+          
+          for f in "$temp_dir"/*; do
+            if [ -f "$f" ]; then
+              local cnt
+              cnt=$(cat "$f")
+              total_active=$((total_active + cnt))
+            fi
+          done
+          rm -rf "$temp_dir"
+          echo "$total_active"
+          return
+        fi
+      fi
+      
+      # Fallback to legacy curl (Note: org runs endpoint returns 404 on modern GitHub)
       local queued_resp in_progress_resp queued_cnt in_progress_cnt
       queued_resp=$(curl -s -H "Authorization: token ${token}" -H "User-Agent: OpenWrt-Runner-Orchestrator" "https://api.github.com/orgs/${org}/actions/runs?status=queued")
       in_progress_resp=$(curl -s -H "Authorization: token ${token}" -H "User-Agent: OpenWrt-Runner-Orchestrator" "https://api.github.com/orgs/${org}/actions/runs?status=in_progress")

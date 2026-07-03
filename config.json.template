@@ -6,6 +6,12 @@
       "type": "github_org",
       "github_org": "RPDevs-Vault",
       "github_token": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
+    },
+    {
+      "id": "rpdevs-builds-org",
+      "type": "github_org",
+      "github_org": "RPDevs-Builds",
+      "github_token": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
     }
   ],
   "machines": [
@@ -20,6 +26,14 @@
         {
           "container_name": "local-runner-builder",
           "monitor_id": "rpdevs-vault-org"
+        },
+        {
+          "container_name": "llmadmin-heavy-builder",
+          "monitor_id": "rpdevs-vault-org"
+        },
+        {
+          "container_name": "llmadmin-lite-builder",
+          "monitor_id": "rpdevs-vault-org"
         }
       ]
     },
@@ -33,7 +47,7 @@
       "runners": [
         {
           "container_name": "t430-runner",
-          "monitor_id": "rpdevs-vault-org"
+          "monitor_id": "rpdevs-builds-org"
         }
       ]
     }
